@@ -1,0 +1,32 @@
+{
+  "name": "emails-import",
+  "version": "1.0.0",
+  "description": "Assessment",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "npm run watch",
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "ts:build": "tsc -p ./",
+    "ts:lint": "tsc -p ./ --noEmit",
+    "open": "open index.html"
+  },
+  "keywords": [
+    "miro",
+    "email"
+  ],
+  "author": "maxim.grishaev@gmail.com",
+  "license": "UNLICENSED",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^25.2.1",
+    "jest": "^25.4.0",
+    "prettier": "^2.0.5",
+    "rollup": "^2.7.2",
+    "rollup-plugin-html-entry": "^0.3.0",
+    "rollup-plugin-typescript2": "^0.27.0",
+    "ts-jest": "^25.4.0",
+    "typescript": "^3.8.3"
+  }
+}
