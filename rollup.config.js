@@ -1,4 +1,7 @@
 import typescript from 'rollup-plugin-typescript2'
+import postcss from 'rollup-plugin-postcss-modules'
+// import postcss from 'rollup-plugin-postcss'
+import autoprefixer from 'autoprefixer'
 import pkg from './package.json'
 
 export default {
@@ -7,5 +10,11 @@ export default {
     file: `./dist/${pkg.name}.js`,
     format: 'iife',
   },
-  plugins: [typescript()],
+  plugins: [typescript(), postcss({
+      modules: {
+        plugins: [autoprefixer()],
+      },
+      plugins: [autoprefixer()],
+      writeDefinitions: true,
+  })],
 }
