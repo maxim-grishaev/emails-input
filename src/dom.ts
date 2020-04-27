@@ -20,7 +20,7 @@ const createItem = (options: { value: string; isValid: boolean; onRemove?: () =>
     ' ',
   )
   itemNode.innerHTML = options.value
-  const cross = createClose()
+  const cross = createCloseButton()
   itemNode.appendChild(cross)
   return itemNode as Item
 }
@@ -54,12 +54,12 @@ export const createInput = (placeholder: string) => {
   return span as Input
 }
 
-export const getItemByClose = (close: ItemCloseButton) => close.parentElement as Item
+export const getItemByCloseButton = (close: ItemCloseButton) => close.parentElement as Item
 
-export const isCloseNode = (node: { className?: string }): node is Item =>
+export const isCloseButton = (node: { className?: string }): node is ItemCloseButton =>
   node.className === styles.itemClose
 
-const createClose = () => {
+const createCloseButton = () => {
   const span = document.createElement('span')
   span.className = styles.itemClose
   return span as ItemCloseButton
@@ -70,4 +70,17 @@ export const createRoot = () => {
   eiNode.contentEditable = 'false'
   eiNode.className = styles.emailsInput
   return eiNode as Root
+}
+
+export const getItems = (rootNode: HTMLElement) => {
+  const { children } = rootNode
+  const { length } = children
+  const items = []
+  for (let i = 0; i < length; i++) {
+    const child = children.item(i)
+    if (isItem(child)) {
+      items.push(child.textContent)
+    }
+  }
+  return items
 }

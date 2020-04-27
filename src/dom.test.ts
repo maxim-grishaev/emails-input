@@ -1,4 +1,11 @@
-import { createEmailItem, isCloseNode, isItem, getItemByClose, ItemCloseButton, Item } from './dom'
+import {
+  createEmailItem,
+  isCloseButton,
+  isItem,
+  getItemByCloseButton,
+  ItemCloseButton,
+  Item,
+} from './dom'
 
 const getClose = (item: Item) => item.children.item(0) as ItemCloseButton
 
@@ -34,12 +41,12 @@ describe('Item', () => {
 
   it('getItemByClose', () => {
     const item = createEmailItem('abc@abc.abc')
-    expect(getItemByClose(getClose(item))).toBe(item)
+    expect(getItemByCloseButton(getClose(item))).toBe(item)
   })
 
   it('isCloseNode', () => {
     const item = createEmailItem('abc@abc.abc')
-    expect(isCloseNode(getClose(item))).toBe(true)
-    expect(isCloseNode(document.createElement('span'))).toBe(false)
+    expect(isCloseButton(getClose(item))).toBe(true)
+    expect(isCloseButton(document.createElement('span'))).toBe(false)
   })
 })

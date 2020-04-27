@@ -1,4 +1,4 @@
-import { createEmailsInput } from './emails-input'
+import { createEmailsInput } from './createEmailsInput'
 
 declare global {
   interface Window {
