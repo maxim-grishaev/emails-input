@@ -150,7 +150,7 @@
           }
       });
   };
-  var listenRoot = function (rootNode, input) {
+  var listenRoot = function (rootNode, input, onRemove) {
       rootNode.addEventListener('click', function (evt) {
           var target = evt.target;
           if (!target) {
@@ -164,6 +164,7 @@
               var item = getItemByCloseButton(target);
               if (item) {
                   rootNode.removeChild(item);
+                  onRemove();
               }
           }
       });
@@ -183,7 +184,7 @@
           input.innerHTML = '';
           updateItems(text);
       });
-      listenRoot(rootNode, input);
+      listenRoot(rootNode, input, pubSub.publish);
       rootNode.appendChild(input);
       container.appendChild(rootNode);
       return {

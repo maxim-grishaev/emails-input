@@ -7,21 +7,91 @@
   <title>MIRO</title>
   <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
   <script src="./dist/emails-input.js"></script>
+  <style type="text/css">
+    .form {
+      font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+      border-radius: 8px;
+      background: #F8F8F7;
+      width: 70%;
+      box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+      margin: 50px;
+      color: #050038;
+      min-width: 350px;
+    }
+
+    .form h2 {
+      font-weight: normal;
+      font-size: 20px;
+      line-height: 27px;
+      margin: 0 0 24px;
+    }
+
+    .form h2 strong {
+      font-weight: 900;
+    }
+
+    .form-body {
+      padding: 32px 50px 24px;
+    }
+
+    #emails-input {
+      height: 100px;
+    }
+
+    .form-footer {
+      background: #fff;
+      padding: 32px 50px;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .form button {
+      background: #4262FF;
+      color: #fff;
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .form button+button {
+      margin-left: 16px;
+    }
+  </style>
 </head>
 
 <body>
-  <!-- form header -->
-  <div id="emails-input" style="width:30%;height:200px"></div>
-  <!-- form footer, buttons -->
+  <div class="form">
+    <div class="form-body">
+      <h2>Share <strong>Board name</strong> with others</h2>
+      <!-- form header -->
+      <div id="emails-input"></div>
+      <!-- form footer, buttons -->
+      <script>
+        var inputContainerNode = document.querySelector('#emails-input');
+        var emailsInput = EmailsInput(inputContainerNode, {
+          placeholder: 'add more people...'
+        });
+        // Handling Add email and Get emails count buttons, etc.
+      </script>
+    </div>
+
+    <div class="form-footer">
+      <button onclick="emailsInput.addItem(Math.random().toString(36).replace('0.', '') + '@miro.com')">Add
+        item</button>
+      <button onclick="alert('Items count: ' + emailsInput.getItems().length)">Get items count</button>
+    </div>
+  </div>
+
+  <hr />
+  <div id="items" disabled="disabled"></div>
   <script>
-    var inputContainerNode = document.querySelector('#emails-input');
-    var emailsInput = EmailsInput(inputContainerNode, {
-      placeholder: 'add more people...'
+    const items = document.getElementById('items')
+    emailsInput.subscribe(() => {
+      items.innerHTML = '<ol>' +
+        emailsInput.getItems().map(line => '<li>' + line + '</li>').join('') +
+        '</ol>'
     });
-    // Handling Add email and Get emails count buttons, etc.
   </script>
-  <button onclick="emailsInput.addItem(Math.random().toString(36).replace('0.', '') + '@miro.com')">Add item</button>
-  <button onclick="alert('Items count: ' + emailsInput.getItems().length)">Get items count</button>
 </body>
 
 </html>
