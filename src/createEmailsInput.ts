@@ -10,6 +10,8 @@ import {
 } from './dom'
 import { isValidEmail } from './isValidEmail'
 import { createPubSub } from './createPubSub'
+import { getClipboardText } from './getClipboardText'
+import { normalizeText } from './normalizeText'
 
 export enum KeyCode {
   COMMA = 188,
@@ -18,9 +20,7 @@ export enum KeyCode {
 
 const listenInput = (input: Input, onTrigger: () => void) => {
   input.addEventListener('blur', () => {
-    if (isValidEmail(input.textContent || '')) {
-      onTrigger()
-    }
+    onTrigger()
   })
   input.addEventListener('keyup', (evt: KeyboardEvent) => {
     switch (evt.keyCode) {
@@ -28,6 +28,15 @@ const listenInput = (input: Input, onTrigger: () => void) => {
       case KeyCode.ENTER:
         onTrigger()
     }
+  })
+  input.addEventListener('paste', (evt: ClipboardEvent) => {
+    evt.preventDefault()
+    const text = getClipboardText(evt)
+    if (!text) {
+      return
+    }
+    input.appendChild(document.createTextNode(' ' + text))
+    onTrigger()
   })
 }
 
@@ -63,7 +72,11 @@ export const createEmailsInput = (
   const pubSub = createPubSub()
 
   const updateItems = (text: string) => {
-    rootNode.appendChild(createFragment(text))
+    const itemsStrings = normalizeText(text)
+    if (itemsStrings.length === 0) {
+      return
+    }
+    rootNode.appendChild(createFragment(itemsStrings))
     rootNode.appendChild(input)
     input.focus()
     pubSub.publish()

@@ -31,14 +31,8 @@ export const createEmailItem = (value: string) =>
     isValid: isValidEmail(value),
   })
 
-const normalizeText = (text: string) =>
-  text
-    .split(',')
-    .map((t) => t.trim())
-    .filter(Boolean)
-
-export const createFragment = (text: string) => {
-  const emailItems = normalizeText(text).map(createEmailItem)
+export const createFragment = (text: string[]) => {
+  const emailItems = text.map(createEmailItem)
   const fragment = document.createDocumentFragment()
   emailItems.forEach((emailItem) => {
     fragment.appendChild(emailItem)
