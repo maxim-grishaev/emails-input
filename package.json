@@ -1,5 +1,5 @@
 {
-  "name": "emails-import",
+  "name": "emails-input",
   "version": "1.0.0",
   "description": "Assessment",
   "main": "dist/index.js",
@@ -10,6 +10,7 @@
     "watch": "rollup -c -w",
     "ts:build": "tsc -p ./",
     "ts:lint": "tsc -p ./ --noEmit",
+    "gen:docs": "cp ./index.html docs & npm run build -- --file=docs/dist/emails-input.js",
     "open": "open index.html"
   },
   "keywords": [
