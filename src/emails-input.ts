@@ -8,13 +8,20 @@ import {
   Input,
   Root,
 } from './dom'
-import { isTriggerKeyCode } from './keyCode'
-import { isValidEmail } from './email'
+import { isValidEmail } from './isValidEmail'
 import { createApi } from './createApi'
 
 interface EIOptions {
   placeholder: string
 }
+
+export enum KeyCode {
+  COMMA = 188,
+  ENTER = 13,
+}
+
+export const isTriggerKeyCode = (keyCode: number) =>
+  [KeyCode.COMMA, KeyCode.ENTER].some((code) => code == keyCode)
 
 const listen = (input: Input, onTrigger: () => void) => {
   input.addEventListener('blur', () => {

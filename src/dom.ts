@@ -1,9 +1,9 @@
 import styles from './assets/emails-input.css'
-import { isValidEmail } from './email'
+import { isValidEmail } from './isValidEmail'
 
 export type Input = HTMLSpanElement
 export type Item = HTMLSpanElement
-export type ItemClose = HTMLSpanElement
+export type ItemCloseButton = HTMLSpanElement
 export type Root = HTMLDivElement
 
 export const isItem = (item: { className?: string } | null): item is Item => {
@@ -54,7 +54,7 @@ export const createInput = (placeholder: string) => {
   return span as Input
 }
 
-export const getItemByClose = (close: ItemClose) => close.parentElement as Item
+export const getItemByClose = (close: ItemCloseButton) => close.parentElement as Item
 
 export const isCloseNode = (node: { className?: string }): node is Item =>
   node.className === styles.itemClose
@@ -62,7 +62,7 @@ export const isCloseNode = (node: { className?: string }): node is Item =>
 const createClose = () => {
   const span = document.createElement('span')
   span.className = styles.itemClose
-  return span as ItemClose
+  return span as ItemCloseButton
 }
 
 export const createRoot = () => {
