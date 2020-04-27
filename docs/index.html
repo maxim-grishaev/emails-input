@@ -51,6 +51,7 @@
       padding: 8px 16px;
       border-radius: 6px;
       cursor: pointer;
+      border: none;
     }
 
     .form button+button {
@@ -76,7 +77,7 @@
     </div>
 
     <div class="form-footer">
-      <button onclick="emailsInput.addItem(Math.random().toString(36).replace('0.', '') + '@miro.com')">Add
+      <button onclick="emailsInput.addItems(Math.random().toString(36).replace('0.', '') + '@miro.com')">Add
         item</button>
       <button onclick="alert('Items count: ' + emailsInput.getItems().length)">Get items count</button>
     </div>
@@ -85,11 +86,30 @@
   <hr />
   <div id="items" disabled="disabled"></div>
   <script>
+    function convertToList(textItems) {
+      return textItems.length > 0
+        ? [
+          '<ol>',
+          textItems.map(function (line) {
+            return '<li>' + line + '</li>'
+          }).join(''),
+          '</ol>'
+        ].join('')
+        : '<p>Nothing here</p>'
+    }
     const items = document.getElementById('items')
-    emailsInput.subscribe(() => {
-      items.innerHTML = '<ol>' +
-        emailsInput.getItems().map(line => '<li>' + line + '</li>').join('') +
-        '</ol>'
+    emailsInput.subscribe(function () {
+      const textItems = emailsInput.getItems()
+      const validItems = textItems.filter(emailsInput.isValid)
+      const invalidItems = textItems.filter(function (val) {
+        return !emailsInput.isValid(val)
+      })
+      items.innerHTML = [
+        '<h3>Valid items</h3>',
+        convertToList(validItems),
+        '<h3>Invalid items</h3>',
+        convertToList(invalidItems),
+      ].join('\n')
     });
   </script>
 </body>
