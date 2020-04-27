@@ -47,7 +47,7 @@
   outline: none;
 }
 .input:not(:focus)::after {
-  display: inline;
+  display: inline-block;
   content: attr(data-placeholder);
   color: gray;
 }
