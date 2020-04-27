@@ -1,40 +1,71 @@
-import styles from './emails-input.css'
+import styles from './assets/emails-input.css'
+import {
+  createRoot,
+  createInput,
+  createFragment,
+  isCloseNode,
+  getItemByClose,
+  Input,
+  Root,
+} from './dom'
+import { isTriggerKeyCode } from './keyCode'
 import { isValidEmail } from './email'
+import { createApi } from './createApi'
 
 interface EIOptions {
   placeholder: string
 }
 
-const createItem = (options: { value: string; isValid: boolean }) => {
-  const itemNode = document.createElement('span')
-  itemNode.contentEditable = 'false'
-  itemNode.className = [styles.item, options.isValid ? styles.validItem : styles.invalidItem].join(
-    ' ',
-  )
-  itemNode.innerHTML = options.value
-  return itemNode
+const listen = (input: Input, onTrigger: () => void) => {
+  input.addEventListener('blur', () => {
+    if (isValidEmail(input.textContent || '')) {
+      onTrigger()
+    }
+  })
+  input.addEventListener('keyup', (evt: KeyboardEvent) => {
+    if (isTriggerKeyCode(evt.keyCode)) {
+      onTrigger()
+    }
+  })
 }
 
-const createEmailItem = (value: string) =>
-  createItem({
-    value,
-    isValid: isValidEmail(value),
+const updateText = (text: string, input: Input, rootNode: Root) => {
+  rootNode.appendChild(createFragment(text))
+  rootNode.appendChild(input)
+  input.focus()
+}
+
+const update = (input: Input, rootNode: Root) => {
+  const text = input.textContent || ''
+  input.innerHTML = ''
+  updateText(text, input, rootNode)
+}
+
+export const createEmailsInput = (container: HTMLElement, options: EIOptions) => {
+  const rootNode = createRoot()
+  const input = createInput(options.placeholder)
+
+  listen(input, () => update(input, rootNode))
+
+  rootNode.addEventListener('click', (evt: MouseEvent) => {
+    const target = evt.target as HTMLElement
+    if (!target) {
+      return
+    }
+    if (target === rootNode) {
+      input.focus()
+      return
+    }
+    if (isCloseNode(target)) {
+      const item = getItemByClose(target)
+      if (item) {
+        rootNode.removeChild(item as Node)
+      }
+    }
   })
 
-const createText = ({ placeholder }: EIOptions) => {
-  const textNode = document.createElement('div')
-  textNode.contentEditable = 'true'
-  textNode.dataset.placeholder = `  ${placeholder}`
-  textNode.className = styles.text
-  return textNode
-}
+  rootNode.appendChild(input)
+  container.appendChild(rootNode)
 
-export const createEmailsInput = (domNode: HTMLDivElement, options: EIOptions) => {
-  domNode.className = styles.wrapper
-  const textNode = createText(options)
-  textNode.appendChild(createEmailItem('lalala'))
-  textNode.appendChild(document.createTextNode(', '))
-  textNode.appendChild(createEmailItem('abc@def.def'))
-  textNode.appendChild(document.createTextNode(', '))
-  domNode.appendChild(textNode)
+  return createApi({ rootNode, update: (text: string) => updateText(text, input, rootNode) })
 }

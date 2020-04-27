@@ -5,12 +5,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MIRO</title>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
   <script src="./dist/emails-import.js"></script>
 </head>
 
 <body>
   <!-- form header -->
-  <div id="emails-input"></div>
+  <div id="emails-input" style="width:30%;height:200px"></div>
   <!-- form footer, buttons -->
   <script>
     var inputContainerNode = document.querySelector('#emails-input');
@@ -19,6 +20,8 @@
     });
     // Handling Add email and Get emails count buttons, etc.
   </script>
+  <button onclick="emailsInput.addItem(Math.random().toString(36).replace('0.', '') + '@miro.com')">Add item</button>
+  <button onclick="alert('Items count: ' + emailsInput.getItems().length)">Get items count</button>
 </body>
 
 </html>

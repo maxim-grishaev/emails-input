@@ -1,0 +1,53 @@
+.emails-input {
+  border: 1px solid #c3c2cf;
+  border-radius: 4px;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 5px;
+  color: #050038;
+  background: #fff;
+  font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.item {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.item-close {
+  margin-left: 8px;
+  cursor: pointer;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-image: url("data:image/svg+xml,%3Csvg width='8' height='8' viewBox='0 0 8 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M8 0.8L7.2 0L4 3.2L0.8 0L0 0.8L3.2 4L0 7.2L0.8 8L4 4.8L7.2 8L8 7.2L4.8 4L8 0.8Z' fill='%23050038'/%3E%3C/svg%3E%0A");
+}
+
+.invalid-item {
+  border-bottom: 1px dashed #f00000;
+  padding: 0;
+}
+
+.valid-item {
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: rgba(102, 153, 255, 0.2);
+}
+
+.input {
+  display: inline-block;
+  min-width: 100px;
+  margin-left: 8px;
+}
+.input:focus {
+  outline: none;
+}
+.input:not(:focus)::after {
+  display: inline;
+  content: attr(data-placeholder);
+  color: gray;
+}
