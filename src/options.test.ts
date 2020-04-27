@@ -1,4 +1,4 @@
-import { isValidEmail } from './isValidEmail'
+import { isValidEmail } from './options'
 
 describe('isValidEmail', () => {
   it.each([

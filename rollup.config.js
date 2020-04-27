@@ -1,6 +1,5 @@
 import typescript from 'rollup-plugin-typescript2'
 import postcss from 'rollup-plugin-postcss-modules'
-// import postcss from 'rollup-plugin-postcss'
 import autoprefixer from 'autoprefixer'
 import pkg from './package.json'
 

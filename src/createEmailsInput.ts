@@ -1,13 +1,8 @@
-import { createRoot, createInput, createFragment, Input, Root } from './dom'
+import { createRoot, createInput, createFragment, Input, Root, createItem } from './dom'
 import { createPubSub } from './createPubSub'
 import { getClipboardText } from './getClipboardText'
-import { normalizeText } from './normalizeText'
-import {
-  createEmailItem,
-  isCloseButton,
-  getItemByCloseButton,
-  getTextItemsByRoot,
-} from './dom.util'
+import { splitByCommaOrSpaces, isValidEmail, DEFAULT_PLACEHOLDER } from './options'
+import { isCloseButton, getItemByCloseButton, getTextItemsByRoot } from './dom.util'
 
 export enum KeyCode {
   COMMA = 188,
@@ -58,12 +53,18 @@ const listenRoot = (rootNode: Root, input: Input, onRemove: () => void) => {
 
 export const createEmailsInput = (
   container: HTMLElement,
-  options: {
-    placeholder: string
-  },
+  {
+    placeholder = DEFAULT_PLACEHOLDER,
+    isValid = isValidEmail,
+    normalizeText = splitByCommaOrSpaces,
+  }: {
+    placeholder?: string
+    isValid?: (text: string) => boolean
+    normalizeText?: (text: string) => string[]
+  } = {},
 ) => {
   const rootNode = createRoot()
-  const input = createInput(options.placeholder)
+  const input = createInput(placeholder)
 
   const pubSub = createPubSub()
 
@@ -73,7 +74,7 @@ export const createEmailsInput = (
       return
     }
 
-    const emailItems = itemsStrings.map(createEmailItem)
+    const emailItems = itemsStrings.map((value) => createItem({ value, isValid: isValid(value) }))
     rootNode.appendChild(createFragment(emailItems))
     rootNode.appendChild(input)
     input.focus()
@@ -94,7 +95,8 @@ export const createEmailsInput = (
   return {
     subscribe: pubSub.subscribe,
     unsubscribe: pubSub.unsubscribe,
-    addItem: updateItems,
+    addItems: updateItems,
+    isValid,
     getItems: () => getTextItemsByRoot(rootNode),
   }
 }

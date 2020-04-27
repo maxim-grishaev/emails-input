@@ -1,12 +1,5 @@
 import styles from './assets/emails-input.css'
-import { createItem, Item, ItemCloseButton } from './dom'
-import { isValidEmail } from './isValidEmail'
-
-export const createEmailItem = (value: string) =>
-  createItem({
-    value,
-    isValid: isValidEmail(value),
-  })
+import { Item, ItemCloseButton } from './dom'
 
 export const isItem = (item: { className?: string } | null): item is Item => {
   if (!item || !item.className) {
