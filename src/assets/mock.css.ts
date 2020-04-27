@@ -3,5 +3,7 @@ const css = {
   itemClose: 'itemClose',
   invalidItem: 'invalidItem',
   validItem: 'validItem',
+  emailsInput: 'emailsInput',
+  input: 'input',
 }
 export default css

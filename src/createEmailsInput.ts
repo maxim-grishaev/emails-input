@@ -1,17 +1,13 @@
-import {
-  createRoot,
-  createInput,
-  createFragment,
-  isCloseButton,
-  getItemByCloseButton,
-  Input,
-  Root,
-  getItems,
-} from './dom'
-import { isValidEmail } from './isValidEmail'
+import { createRoot, createInput, createFragment, Input, Root } from './dom'
 import { createPubSub } from './createPubSub'
 import { getClipboardText } from './getClipboardText'
 import { normalizeText } from './normalizeText'
+import {
+  createEmailItem,
+  isCloseButton,
+  getItemByCloseButton,
+  getTextItemsByRoot,
+} from './dom.util'
 
 export enum KeyCode {
   COMMA = 188,
@@ -76,7 +72,9 @@ export const createEmailsInput = (
     if (itemsStrings.length === 0) {
       return
     }
-    rootNode.appendChild(createFragment(itemsStrings))
+
+    const emailItems = itemsStrings.map(createEmailItem)
+    rootNode.appendChild(createFragment(emailItems))
     rootNode.appendChild(input)
     input.focus()
     pubSub.publish()
@@ -97,6 +95,6 @@ export const createEmailsInput = (
     subscribe: pubSub.subscribe,
     unsubscribe: pubSub.unsubscribe,
     addItem: updateItems,
-    getItems: () => getItems(rootNode),
+    getItems: () => getTextItemsByRoot(rootNode),
   }
 }

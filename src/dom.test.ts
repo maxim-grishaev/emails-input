@@ -1,31 +1,34 @@
-import {
-  createEmailItem,
-  isCloseButton,
-  isItem,
-  getItemByCloseButton,
-  ItemCloseButton,
-  Item,
-} from './dom'
+import { createInput, createItem, createRoot, createFragment } from './dom'
 
-const getClose = (item: Item) => item.children.item(0) as ItemCloseButton
-
-describe('Item', () => {
-  it('createsItem', () => {
-    expect(createEmailItem('text')).toMatchInlineSnapshot(`
+describe('create DOM stuff', () => {
+  it('createInput', () => {
+    expect(createInput('test ph')).toMatchInlineSnapshot(`
       <span
-        class="item invalidItem"
-      >
-        text
-        <span
-          class="itemClose"
-        />
-      </span>
+        class="input"
+        contenteditable="true"
+        data-placeholder="test ph"
+      />
     `)
-    expect(createEmailItem('abc@abc.abc')).toMatchInlineSnapshot(`
+  })
+
+  it('createItem', () => {
+    expect(createItem({ value: 'good val', isValid: true })).toMatchInlineSnapshot(`
       <span
         class="item validItem"
+        contenteditable="false"
       >
-        abc@abc.abc
+        good val
+        <span
+          class="itemClose"
+        />
+      </span>
+    `)
+    expect(createItem({ value: 'bad val', isValid: false })).toMatchInlineSnapshot(`
+      <span
+        class="item invalidItem"
+        contenteditable="false"
+      >
+        bad val
         <span
           class="itemClose"
         />
@@ -33,20 +36,20 @@ describe('Item', () => {
     `)
   })
 
-  it('tests corrctly', () => {
-    const item = createEmailItem('abc@abc.abc')
-    expect(isItem(item)).toBe(true)
-    expect(isItem(document.createElement('div'))).toBe(false)
+  it('createRoot', () => {
+    expect(createRoot()).toMatchInlineSnapshot(`
+      <div
+        class="emailsInput"
+      />
+    `)
   })
 
-  it('getItemByCloseButton', () => {
-    const item = createEmailItem('abc@abc.abc')
-    expect(getItemByCloseButton(getClose(item))).toBe(item)
-  })
-
-  it('isCloseNode', () => {
-    const item = createEmailItem('abc@abc.abc')
-    expect(isCloseButton(getClose(item))).toBe(true)
-    expect(isCloseButton(document.createElement('span'))).toBe(false)
+  it('createFragment', () => {
+    expect(createFragment([])).toMatchInlineSnapshot(`<DocumentFragment />`)
+    expect(createFragment([document.createElement('foo')])).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        <foo />
+      </DocumentFragment>
+    `)
   })
 })

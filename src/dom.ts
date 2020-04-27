@@ -1,21 +1,13 @@
 import styles from './assets/emails-input.css'
-import { isValidEmail } from './isValidEmail'
 
 export type Input = HTMLSpanElement
 export type Item = HTMLSpanElement
 export type ItemCloseButton = HTMLSpanElement
 export type Root = HTMLDivElement
 
-export const isItem = (item: { className?: string } | null): item is Item => {
-  if (!item || !item.className) {
-    return false
-  }
-  return item.className.split(' ').some((cn) => cn === styles.item)
-}
-
-const createItem = (options: { value: string; isValid: boolean; onRemove?: () => void }) => {
+export const createItem = (options: { value: string; isValid: boolean; onRemove?: () => void }) => {
   const itemNode = document.createElement('span')
-  itemNode.contentEditable = 'false'
+  itemNode.setAttribute('contenteditable', String(false))
   itemNode.className = [styles.item, options.isValid ? styles.validItem : styles.invalidItem].join(
     ' ',
   )
@@ -25,33 +17,21 @@ const createItem = (options: { value: string; isValid: boolean; onRemove?: () =>
   return itemNode as Item
 }
 
-export const createEmailItem = (value: string) =>
-  createItem({
-    value,
-    isValid: isValidEmail(value),
-  })
-
-export const createFragment = (text: string[]) => {
-  const emailItems = text.map(createEmailItem)
+export const createFragment = (items: HTMLElement[]) => {
   const fragment = document.createDocumentFragment()
-  emailItems.forEach((emailItem) => {
-    fragment.appendChild(emailItem)
+  items.forEach((item) => {
+    fragment.appendChild(item)
   })
   return fragment
 }
 
 export const createInput = (placeholder: string) => {
   const span = document.createElement('span')
-  span.dataset.placeholder = `  ${placeholder}`
+  span.dataset.placeholder = placeholder
   span.className = styles.input
-  span.contentEditable = 'true'
+  span.setAttribute('contenteditable', String(true))
   return span as Input
 }
-
-export const getItemByCloseButton = (close: ItemCloseButton) => close.parentElement as Item
-
-export const isCloseButton = (node: { className?: string }): node is ItemCloseButton =>
-  node.className === styles.itemClose
 
 const createCloseButton = () => {
   const span = document.createElement('span')
@@ -61,20 +41,6 @@ const createCloseButton = () => {
 
 export const createRoot = () => {
   const eiNode = document.createElement('div')
-  eiNode.contentEditable = 'false'
   eiNode.className = styles.emailsInput
   return eiNode as Root
-}
-
-export const getItems = (rootNode: HTMLElement) => {
-  const { children } = rootNode
-  const { length } = children
-  const items = []
-  for (let i = 0; i < length; i++) {
-    const child = children.item(i)
-    if (isItem(child)) {
-      items.push(child.textContent)
-    }
-  }
-  return items
 }
