@@ -39,7 +39,7 @@ describe('Item', () => {
     expect(isItem(document.createElement('div'))).toBe(false)
   })
 
-  it('getItemByClose', () => {
+  it('getItemByCloseButton', () => {
     const item = createEmailItem('abc@abc.abc')
     expect(getItemByCloseButton(getClose(item))).toBe(item)
   })

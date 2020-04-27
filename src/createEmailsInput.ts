@@ -9,7 +9,7 @@ import {
   getItems,
 } from './dom'
 import { isValidEmail } from './isValidEmail'
-import { createEventsManager } from './createEventsManager'
+import { createPubSub } from './createPubSub'
 
 export enum KeyCode {
   COMMA = 188,
@@ -59,13 +59,13 @@ export const createEmailsInput = (
   const rootNode = createRoot()
   const input = createInput(options.placeholder)
 
-  const eventsManager = createEventsManager()
+  const pubSub = createPubSub()
 
   const updateItems = (text: string) => {
     rootNode.appendChild(createFragment(text))
     rootNode.appendChild(input)
     input.focus()
-    eventsManager.notify()
+    pubSub.publish()
   }
 
   listenInput(input, () => {
@@ -80,8 +80,8 @@ export const createEmailsInput = (
   container.appendChild(rootNode)
 
   return {
-    subscribe: eventsManager.subscribe,
-    unsubscribe: eventsManager.unsubscribe,
+    subscribe: pubSub.subscribe,
+    unsubscribe: pubSub.unsubscribe,
     addItem: updateItems,
     getItems: () => getItems(rootNode),
   }
