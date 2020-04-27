@@ -31,7 +31,7 @@ const listenInput = (input: Input, onTrigger: () => void) => {
   })
 }
 
-const listenRoot = (rootNode: Root, input: Input) => {
+const listenRoot = (rootNode: Root, input: Input, onRemove: () => void) => {
   rootNode.addEventListener('click', (evt: MouseEvent) => {
     const target = evt.target as HTMLElement
     if (!target) {
@@ -45,6 +45,7 @@ const listenRoot = (rootNode: Root, input: Input) => {
       const item = getItemByCloseButton(target)
       if (item) {
         rootNode.removeChild(item as Node)
+        onRemove()
       }
     }
   })
@@ -74,7 +75,7 @@ export const createEmailsInput = (
     updateItems(text)
   })
 
-  listenRoot(rootNode, input)
+  listenRoot(rootNode, input, pubSub.publish)
 
   rootNode.appendChild(input)
   container.appendChild(rootNode)
