@@ -32,54 +32,28 @@
   var styles = {"emails-input":"emails-input_emails-input__xFLm2","item":"emails-input_item__2MpRH","item-close":"emails-input_item-close__3GCuf","invalid-item":"emails-input_invalid-item__1M_in","valid-item":"emails-input_valid-item__36BwW","input":"emails-input_input__3XZXQ","emailsInput":"emails-input_emails-input__xFLm2","itemClose":"emails-input_item-close__3GCuf","invalidItem":"emails-input_invalid-item__1M_in","validItem":"emails-input_valid-item__36BwW"};
   styleInject(css_248z);
 
-  var VALID_EMAIL_RE = /^[-_.+a-z\d]+@[-_.a-z\d]+\.[a-z\d]+$/i;
-  var isValidEmail = function (value) { return VALID_EMAIL_RE.test(value); };
-
-  var isItem = function (item) {
-      if (!item || !item.className) {
-          return false;
-      }
-      return item.className.split(' ').some(function (cn) { return cn === styles.item; });
-  };
   var createItem = function (options) {
       var itemNode = document.createElement('span');
-      itemNode.contentEditable = 'false';
+      itemNode.setAttribute('contenteditable', String(false));
       itemNode.className = [styles.item, options.isValid ? styles.validItem : styles.invalidItem].join(' ');
       itemNode.innerHTML = options.value;
       var cross = createCloseButton();
       itemNode.appendChild(cross);
       return itemNode;
   };
-  var createEmailItem = function (value) {
-      return createItem({
-          value: value,
-          isValid: isValidEmail(value),
-      });
-  };
-  var normalizeText = function (text) {
-      return text
-          .split(',')
-          .map(function (t) { return t.trim(); })
-          .filter(Boolean);
-  };
-  var createFragment = function (text) {
-      var emailItems = normalizeText(text).map(createEmailItem);
+  var createFragment = function (items) {
       var fragment = document.createDocumentFragment();
-      emailItems.forEach(function (emailItem) {
-          fragment.appendChild(emailItem);
+      items.forEach(function (item) {
+          fragment.appendChild(item);
       });
       return fragment;
   };
   var createInput = function (placeholder) {
       var span = document.createElement('span');
-      span.dataset.placeholder = "  " + placeholder;
+      span.dataset.placeholder = placeholder;
       span.className = styles.input;
-      span.contentEditable = 'true';
+      span.setAttribute('contenteditable', String(true));
       return span;
-  };
-  var getItemByCloseButton = function (close) { return close.parentElement; };
-  var isCloseButton = function (node) {
-      return node.className === styles.itemClose;
   };
   var createCloseButton = function () {
       var span = document.createElement('span');
@@ -88,21 +62,8 @@
   };
   var createRoot = function () {
       var eiNode = document.createElement('div');
-      eiNode.contentEditable = 'false';
       eiNode.className = styles.emailsInput;
       return eiNode;
-  };
-  var getItems = function (rootNode) {
-      var children = rootNode.children;
-      var length = children.length;
-      var items = [];
-      for (var i = 0; i < length; i++) {
-          var child = children.item(i);
-          if (isItem(child)) {
-              items.push(child.textContent);
-          }
-      }
-      return items;
   };
 
   var createPubSub = function () {
@@ -131,6 +92,57 @@
       };
   };
 
+  var getClipboardText = function (evt) {
+      var _a;
+      var clipboardData = evt.clipboardData || ((_a = evt.originalEvent) === null || _a === void 0 ? void 0 : _a.clipboardData);
+      if (clipboardData) {
+          return clipboardData.getData('text/plain');
+      }
+      if (window.clipboardData) {
+          return window.clipboardData.getData('Text');
+      }
+  };
+
+  var SEPARATOR_RE = /(?:,|\s+)/;
+  var normalizeText = function (text) {
+      return text
+          .split(SEPARATOR_RE)
+          .map(function (t) { return t.trim(); })
+          .filter(Boolean);
+  };
+
+  var VALID_EMAIL_RE = /^[-_.+a-z\d]+@[-_.a-z\d]+\.[a-z\d]+$/i;
+  var isValidEmail = function (value) { return VALID_EMAIL_RE.test(value); };
+
+  var createEmailItem = function (value) {
+      return createItem({
+          value: value,
+          isValid: isValidEmail(value),
+      });
+  };
+  var isItem = function (item) {
+      if (!item || !item.className) {
+          return false;
+      }
+      return item.className.split(' ').some(function (cn) { return cn === styles.item; });
+  };
+  var getItemByCloseButton = function (close) { return close.parentElement; };
+  var isCloseButton = function (node) {
+      return node.className === styles.itemClose;
+  };
+  var getTextItemsByRoot = function (rootNode) {
+      var children = rootNode.children;
+      var length = children.length;
+      var items = [];
+      for (var i = 0; i < length; i++) {
+          var child = children.item(i);
+          if (isItem(child)) {
+              items.push(child.textContent);
+          }
+      }
+      return items;
+  };
+
   var KeyCode;
   (function (KeyCode) {
       KeyCode[KeyCode["COMMA"] = 188] = "COMMA";
@@ -138,9 +150,7 @@
   })(KeyCode || (KeyCode = {}));
   var listenInput = function (input, onTrigger) {
       input.addEventListener('blur', function () {
-          if (isValidEmail(input.textContent || '')) {
-              onTrigger();
-          }
+          onTrigger();
       });
       input.addEventListener('keyup', function (evt) {
           switch (evt.keyCode) {
@@ -148,6 +158,15 @@
               case KeyCode.ENTER:
                   onTrigger();
           }
+      });
+      input.addEventListener('paste', function (evt) {
+          evt.preventDefault();
+          var text = getClipboardText(evt);
+          if (!text) {
+              return;
+          }
+          input.appendChild(document.createTextNode(' ' + text));
+          onTrigger();
       });
   };
   var listenRoot = function (rootNode, input, onRemove) {
@@ -174,7 +193,12 @@
       var input = createInput(options.placeholder);
       var pubSub = createPubSub();
       var updateItems = function (text) {
-          rootNode.appendChild(createFragment(text));
+          var itemsStrings = normalizeText(text);
+          if (itemsStrings.length === 0) {
+              return;
+          }
+          var emailItems = itemsStrings.map(createEmailItem);
+          rootNode.appendChild(createFragment(emailItems));
           rootNode.appendChild(input);
           input.focus();
           pubSub.publish();
@@ -191,7 +215,7 @@
           subscribe: pubSub.subscribe,
           unsubscribe: pubSub.unsubscribe,
           addItem: updateItems,
-          getItems: function () { return getItems(rootNode); },
+          getItems: function () { return getTextItemsByRoot(rootNode); },
       };
   };
 
