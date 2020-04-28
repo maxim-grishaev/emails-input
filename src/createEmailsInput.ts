@@ -23,25 +23,34 @@ export const createEmailsInput = (
 
   const pubSub = createPubSub()
 
+  const createNormalizedItem = (value: string) =>
+    createItem({
+      value,
+      isValid: isValid(value),
+    })
+
   const addItems = (text: string) => {
     const itemsStrings = normalizeText(text)
     if (itemsStrings.length === 0) {
       return
     }
 
-    const emailItems = itemsStrings.map((value) => createItem({ value, isValid: isValid(value) }))
-    rootNode.appendChild(createFragment(emailItems))
+    const normalizedItems = itemsStrings.map(createNormalizedItem)
+    const itemsFragment = createFragment(normalizedItems)
+    rootNode.appendChild(itemsFragment)
     rootNode.appendChild(input)
     cache.invalidate()
     input.focus()
     pubSub.publish()
   }
+
   listenInput(input, addItems)
 
   const onRemoveItem = () => {
     cache.invalidate()
     pubSub.publish()
   }
+
   listenRoot(rootNode, input, onRemoveItem)
 
   rootNode.appendChild(input)

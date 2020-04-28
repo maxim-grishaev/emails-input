@@ -8,9 +8,8 @@ export type Root = HTMLDivElement
 export const createItem = (options: { value: string; isValid: boolean; onRemove?: () => void }) => {
   const itemNode = document.createElement('span')
   itemNode.setAttribute('contenteditable', String(false))
-  itemNode.className = [styles.item, options.isValid ? styles.validItem : styles.invalidItem].join(
-    ' ',
-  )
+  const validityClassName = options.isValid ? styles.validItem : styles.invalidItem
+  itemNode.className = [styles.item, validityClassName].join(' ')
   itemNode.innerHTML = options.value
   const cross = createCloseButton()
   itemNode.appendChild(cross)

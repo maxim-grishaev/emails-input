@@ -35,7 +35,8 @@
   var createItem = function (options) {
       var itemNode = document.createElement('span');
       itemNode.setAttribute('contenteditable', String(false));
-      itemNode.className = [styles.item, options.isValid ? styles.validItem : styles.invalidItem].join(' ');
+      var validityClassName = options.isValid ? styles.validItem : styles.invalidItem;
+      itemNode.className = [styles.item, validityClassName].join(' ');
       itemNode.innerHTML = options.value;
       var cross = createCloseButton();
       itemNode.appendChild(cross);
@@ -214,13 +215,20 @@
       var input = createInput(placeholder);
       var cache = createLazyCache(function () { return getTextItemsByRoot(rootNode); }, []);
       var pubSub = createPubSub();
+      var createNormalizedItem = function (value) {
+          return createItem({
+              value: value,
+              isValid: isValid(value),
+          });
+      };
       var addItems = function (text) {
           var itemsStrings = normalizeText(text);
           if (itemsStrings.length === 0) {
               return;
           }
-          var emailItems = itemsStrings.map(function (value) { return createItem({ value: value, isValid: isValid(value) }); });
-          rootNode.appendChild(createFragment(emailItems));
+          var normalizedItems = itemsStrings.map(createNormalizedItem);
+          var itemsFragment = createFragment(normalizedItems);
+          rootNode.appendChild(itemsFragment);
           rootNode.appendChild(input);
           cache.invalidate();
           input.focus();
