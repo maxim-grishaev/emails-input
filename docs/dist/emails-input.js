@@ -120,7 +120,10 @@
       for (var i = 0; i < length; i++) {
           var child = children.item(i);
           if (isItem(child)) {
-              items.push(child.textContent);
+              var text = child.textContent;
+              if (text) {
+                  items.push(text);
+              }
           }
       }
       return items;
@@ -189,6 +192,8 @@
 
   var createEmailsInput = function (container, _a) {
       var _b = _a === void 0 ? {} : _a, _c = _b.placeholder, placeholder = _c === void 0 ? DEFAULT_PLACEHOLDER : _c, _d = _b.isValid, isValid = _d === void 0 ? isValidEmail : _d, _e = _b.normalizeText, normalizeText = _e === void 0 ? splitByCommaOrSpaces : _e;
+      var EMPTY_CACHE = 'EMPTY_CACHE';
+      var itemsCache = EMPTY_CACHE;
       var rootNode = createRoot();
       var input = createInput(placeholder);
       var pubSub = createPubSub();
@@ -200,11 +205,15 @@
           var emailItems = itemsStrings.map(function (value) { return createItem({ value: value, isValid: isValid(value) }); });
           rootNode.appendChild(createFragment(emailItems));
           rootNode.appendChild(input);
+          itemsCache = EMPTY_CACHE;
           input.focus();
           pubSub.publish();
       };
       listenInput(input, addItems);
-      listenRoot(rootNode, input, pubSub.publish);
+      listenRoot(rootNode, input, function () {
+          itemsCache = EMPTY_CACHE;
+          pubSub.publish();
+      });
       rootNode.appendChild(input);
       container.appendChild(rootNode);
       return {
@@ -212,7 +221,12 @@
           unsubscribe: pubSub.unsubscribe,
           addItems: addItems,
           isValid: isValid,
-          getItems: function () { return getTextItemsByRoot(rootNode); },
+          getItems: function () {
+              if (itemsCache === EMPTY_CACHE) {
+                  itemsCache = getTextItemsByRoot(rootNode);
+              }
+              return itemsCache;
+          },
       };
   };
 

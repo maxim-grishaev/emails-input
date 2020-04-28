@@ -16,6 +16,9 @@ export const createEmailsInput = (
     normalizeText?: (text: string) => string[]
   } = {},
 ) => {
+  const EMPTY_CACHE = 'EMPTY_CACHE' as const
+  let itemsCache: string[] | typeof EMPTY_CACHE = EMPTY_CACHE
+
   const rootNode = createRoot()
   const input = createInput(placeholder)
 
@@ -30,12 +33,16 @@ export const createEmailsInput = (
     const emailItems = itemsStrings.map((value) => createItem({ value, isValid: isValid(value) }))
     rootNode.appendChild(createFragment(emailItems))
     rootNode.appendChild(input)
+    itemsCache = EMPTY_CACHE
     input.focus()
     pubSub.publish()
   }
   listenInput(input, addItems)
 
-  listenRoot(rootNode, input, pubSub.publish)
+  listenRoot(rootNode, input, () => {
+    itemsCache = EMPTY_CACHE
+    pubSub.publish()
+  })
 
   rootNode.appendChild(input)
   container.appendChild(rootNode)
@@ -45,6 +52,11 @@ export const createEmailsInput = (
     unsubscribe: pubSub.unsubscribe,
     addItems: addItems,
     isValid,
-    getItems: () => getTextItemsByRoot(rootNode),
+    getItems: () => {
+      if (itemsCache === EMPTY_CACHE) {
+        itemsCache = getTextItemsByRoot(rootNode)
+      }
+      return itemsCache
+    },
   }
 }

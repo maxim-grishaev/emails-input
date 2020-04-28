@@ -17,11 +17,14 @@ export const isCloseButton = (node: { className?: string }): node is ItemCloseBu
 export const getTextItemsByRoot = (rootNode: Root) => {
   const { children } = rootNode
   const { length } = children
-  const items = []
+  const items = [] as string[]
   for (let i = 0; i < length; i++) {
     const child = children.item(i)
     if (isItem(child)) {
-      items.push(child.textContent)
+      const text = child.textContent
+      if (text) {
+        items.push(text)
+      }
     }
   }
   return items
