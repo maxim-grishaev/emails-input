@@ -92,17 +92,6 @@
       };
   };
 
-  var getClipboardText = function (evt) {
-      var _a;
-      var clipboardData = evt.clipboardData || ((_a = evt.originalEvent) === null || _a === void 0 ? void 0 : _a.clipboardData);
-      if (clipboardData) {
-          return clipboardData.getData('text/plain');
-      }
-      if (window.clipboardData) {
-          return window.clipboardData.getData('Text');
-      }
-  };
-
   var SEPARATOR_RE = /(?:,|\s+)/;
   var splitByCommaOrSpaces = function (text) {
       return text
@@ -137,30 +126,45 @@
       return items;
   };
 
+  var getClipboardText = function (evt) {
+      var _a;
+      var clipboardData = evt.clipboardData || ((_a = evt.originalEvent) === null || _a === void 0 ? void 0 : _a.clipboardData);
+      if (clipboardData) {
+          return clipboardData.getData('text/plain');
+      }
+      if (window.clipboardData) {
+          return window.clipboardData.getData('Text');
+      }
+  };
+
   var KeyCode;
   (function (KeyCode) {
       KeyCode[KeyCode["COMMA"] = 188] = "COMMA";
       KeyCode[KeyCode["ENTER"] = 13] = "ENTER";
   })(KeyCode || (KeyCode = {}));
-  var listenInput = function (input, onTrigger) {
-      input.addEventListener('blur', function () {
-          onTrigger();
-      });
+  var listenInput = function (input, onAdd) {
+      var flushInputValue = function () {
+          var text = input.textContent || '';
+          if (text) {
+              onAdd(text);
+              input.innerHTML = '';
+          }
+      };
+      input.addEventListener('blur', flushInputValue);
       input.addEventListener('keyup', function (evt) {
           switch (evt.keyCode) {
               case KeyCode.COMMA:
               case KeyCode.ENTER:
-                  onTrigger();
+                  flushInputValue();
           }
       });
       input.addEventListener('paste', function (evt) {
           evt.preventDefault();
-          var text = getClipboardText(evt);
-          if (!text) {
-              return;
+          flushInputValue();
+          var clipboardText = getClipboardText(evt);
+          if (clipboardText) {
+              onAdd(clipboardText);
           }
-          input.appendChild(document.createTextNode(' ' + text));
-          onTrigger();
       });
   };
   var listenRoot = function (rootNode, input, onRemove) {
@@ -182,12 +186,13 @@
           }
       });
   };
+
   var createEmailsInput = function (container, _a) {
       var _b = _a === void 0 ? {} : _a, _c = _b.placeholder, placeholder = _c === void 0 ? DEFAULT_PLACEHOLDER : _c, _d = _b.isValid, isValid = _d === void 0 ? isValidEmail : _d, _e = _b.normalizeText, normalizeText = _e === void 0 ? splitByCommaOrSpaces : _e;
       var rootNode = createRoot();
       var input = createInput(placeholder);
       var pubSub = createPubSub();
-      var updateItems = function (text) {
+      var addItems = function (text) {
           var itemsStrings = normalizeText(text);
           if (itemsStrings.length === 0) {
               return;
@@ -198,18 +203,14 @@
           input.focus();
           pubSub.publish();
       };
-      listenInput(input, function () {
-          var text = input.textContent || '';
-          input.innerHTML = '';
-          updateItems(text);
-      });
+      listenInput(input, addItems);
       listenRoot(rootNode, input, pubSub.publish);
       rootNode.appendChild(input);
       container.appendChild(rootNode);
       return {
           subscribe: pubSub.subscribe,
           unsubscribe: pubSub.unsubscribe,
-          addItems: updateItems,
+          addItems: addItems,
           isValid: isValid,
           getItems: function () { return getTextItemsByRoot(rootNode); },
       };

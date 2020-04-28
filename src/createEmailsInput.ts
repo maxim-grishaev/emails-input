@@ -1,55 +1,8 @@
-import { createRoot, createInput, createFragment, Input, Root, createItem } from './dom'
+import { createRoot, createInput, createFragment, createItem } from './dom'
 import { createPubSub } from './createPubSub'
-import { getClipboardText } from './getClipboardText'
 import { splitByCommaOrSpaces, isValidEmail, DEFAULT_PLACEHOLDER } from './options'
-import { isCloseButton, getItemByCloseButton, getTextItemsByRoot } from './dom.util'
-
-export enum KeyCode {
-  COMMA = 188,
-  ENTER = 13,
-}
-
-const listenInput = (input: Input, onTrigger: () => void) => {
-  input.addEventListener('blur', () => {
-    onTrigger()
-  })
-  input.addEventListener('keyup', (evt: KeyboardEvent) => {
-    switch (evt.keyCode) {
-      case KeyCode.COMMA:
-      case KeyCode.ENTER:
-        onTrigger()
-    }
-  })
-  input.addEventListener('paste', (evt: ClipboardEvent) => {
-    evt.preventDefault()
-    const text = getClipboardText(evt)
-    if (!text) {
-      return
-    }
-    input.appendChild(document.createTextNode(' ' + text))
-    onTrigger()
-  })
-}
-
-const listenRoot = (rootNode: Root, input: Input, onRemove: () => void) => {
-  rootNode.addEventListener('click', (evt: MouseEvent) => {
-    const target = evt.target as HTMLElement
-    if (!target) {
-      return
-    }
-    if (target === rootNode) {
-      input.focus()
-      return
-    }
-    if (isCloseButton(target)) {
-      const item = getItemByCloseButton(target)
-      if (item) {
-        rootNode.removeChild(item as Node)
-        onRemove()
-      }
-    }
-  })
-}
+import { getTextItemsByRoot } from './dom.util'
+import { listenInput, listenRoot } from './dom.events'
 
 export const createEmailsInput = (
   container: HTMLElement,
@@ -68,7 +21,7 @@ export const createEmailsInput = (
 
   const pubSub = createPubSub()
 
-  const updateItems = (text: string) => {
+  const addItems = (text: string) => {
     const itemsStrings = normalizeText(text)
     if (itemsStrings.length === 0) {
       return
@@ -80,12 +33,7 @@ export const createEmailsInput = (
     input.focus()
     pubSub.publish()
   }
-
-  listenInput(input, () => {
-    const text = input.textContent || ''
-    input.innerHTML = ''
-    updateItems(text)
-  })
+  listenInput(input, addItems)
 
   listenRoot(rootNode, input, pubSub.publish)
 
@@ -95,7 +43,7 @@ export const createEmailsInput = (
   return {
     subscribe: pubSub.subscribe,
     unsubscribe: pubSub.unsubscribe,
-    addItems: updateItems,
+    addItems: addItems,
     isValid,
     getItems: () => getTextItemsByRoot(rootNode),
   }

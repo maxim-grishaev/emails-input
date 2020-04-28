@@ -64,18 +64,17 @@
   <div class="form">
     <div class="form-body">
       <h2>Share <strong>Board name</strong> with others</h2>
-      <!-- form header -->
+
       <div id="emails-input"></div>
-      <!-- form footer, buttons -->
       <script>
         var inputContainerNode = document.querySelector('#emails-input');
         var emailsInput = EmailsInput(inputContainerNode, {
           placeholder: 'add more people...'
         });
-        // Handling Add email and Get emails count buttons, etc.
       </script>
     </div>
 
+    <!-- form footer, buttons -->
     <div class="form-footer">
       <button onclick="emailsInput.addItems(Math.random().toString(36).replace('0.', '') + '@miro.com')">Add
         item</button>
@@ -105,9 +104,10 @@
         return !emailsInput.isValid(val)
       })
       items.innerHTML = [
-        '<h3>Valid items</h3>',
+        '<h2>Items quantity: ' + textItems.length + '</h2>',
+        '<h3>Valid items: ' + validItems.length + '</h3>',
         convertToList(validItems),
-        '<h3>Invalid items</h3>',
+        '<h3>Invalid items: ' + invalidItems.length + '</h3>',
         convertToList(invalidItems),
       ].join('\n')
     });

@@ -1,5 +1,6 @@
 import styles from './assets/emails-input.css'
-import { Item, ItemCloseButton } from './dom'
+import { Item, ItemCloseButton, Root, Input } from './dom'
+import { input } from './assets/emails-input.css'
 
 export const isItem = (item: { className?: string } | null): item is Item => {
   if (!item || !item.className) {
@@ -13,7 +14,7 @@ export const getItemByCloseButton = (close: ItemCloseButton) => close.parentElem
 export const isCloseButton = (node: { className?: string }): node is ItemCloseButton =>
   node.className === styles.itemClose
 
-export const getTextItemsByRoot = (rootNode: HTMLElement) => {
+export const getTextItemsByRoot = (rootNode: Root) => {
   const { children } = rootNode
   const { length } = children
   const items = []
