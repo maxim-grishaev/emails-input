@@ -3,6 +3,7 @@ import { createPubSub } from './createPubSub'
 import { splitByCommaOrSpaces, isValidEmail, DEFAULT_PLACEHOLDER } from './options'
 import { getTextItemsByRoot } from './dom.util'
 import { listenInput, listenRoot } from './dom.events'
+import { createLazyCache } from './createLazyCache'
 
 export const createEmailsInput = (
   container: HTMLElement,
@@ -16,11 +17,9 @@ export const createEmailsInput = (
     normalizeText?: (text: string) => string[]
   } = {},
 ) => {
-  const EMPTY_CACHE = 'EMPTY_CACHE' as const
-  let itemsCache: string[] | typeof EMPTY_CACHE = EMPTY_CACHE
-
   const rootNode = createRoot()
   const input = createInput(placeholder)
+  const cache = createLazyCache(() => getTextItemsByRoot(rootNode), [])
 
   const pubSub = createPubSub()
 
@@ -33,16 +32,17 @@ export const createEmailsInput = (
     const emailItems = itemsStrings.map((value) => createItem({ value, isValid: isValid(value) }))
     rootNode.appendChild(createFragment(emailItems))
     rootNode.appendChild(input)
-    itemsCache = EMPTY_CACHE
+    cache.invalidate()
     input.focus()
     pubSub.publish()
   }
   listenInput(input, addItems)
 
-  listenRoot(rootNode, input, () => {
-    itemsCache = EMPTY_CACHE
+  const onRemoveItem = () => {
+    cache.invalidate()
     pubSub.publish()
-  })
+  }
+  listenRoot(rootNode, input, onRemoveItem)
 
   rootNode.appendChild(input)
   container.appendChild(rootNode)
@@ -50,13 +50,8 @@ export const createEmailsInput = (
   return {
     subscribe: pubSub.subscribe,
     unsubscribe: pubSub.unsubscribe,
-    addItems: addItems,
+    addItems,
     isValid,
-    getItems: () => {
-      if (itemsCache === EMPTY_CACHE) {
-        itemsCache = getTextItemsByRoot(rootNode)
-      }
-      return itemsCache
-    },
+    getItems: cache.read,
   }
 }

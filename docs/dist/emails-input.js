@@ -190,12 +190,29 @@
       });
   };
 
+  var createLazyCache = function (getValue, initValue) {
+      var hasValue = initValue !== undefined;
+      var value = initValue;
+      return {
+          invalidate: function () {
+              value = undefined;
+              hasValue = false;
+          },
+          read: function () {
+              if (!hasValue) {
+                  value = getValue();
+                  hasValue = true;
+              }
+              return value;
+          },
+      };
+  };
+
   var createEmailsInput = function (container, _a) {
       var _b = _a === void 0 ? {} : _a, _c = _b.placeholder, placeholder = _c === void 0 ? DEFAULT_PLACEHOLDER : _c, _d = _b.isValid, isValid = _d === void 0 ? isValidEmail : _d, _e = _b.normalizeText, normalizeText = _e === void 0 ? splitByCommaOrSpaces : _e;
-      var EMPTY_CACHE = 'EMPTY_CACHE';
-      var itemsCache = EMPTY_CACHE;
       var rootNode = createRoot();
       var input = createInput(placeholder);
+      var cache = createLazyCache(function () { return getTextItemsByRoot(rootNode); }, []);
       var pubSub = createPubSub();
       var addItems = function (text) {
           var itemsStrings = normalizeText(text);
@@ -205,15 +222,16 @@
           var emailItems = itemsStrings.map(function (value) { return createItem({ value: value, isValid: isValid(value) }); });
           rootNode.appendChild(createFragment(emailItems));
           rootNode.appendChild(input);
-          itemsCache = EMPTY_CACHE;
+          cache.invalidate();
           input.focus();
           pubSub.publish();
       };
       listenInput(input, addItems);
-      listenRoot(rootNode, input, function () {
-          itemsCache = EMPTY_CACHE;
+      var onRemoveItem = function () {
+          cache.invalidate();
           pubSub.publish();
-      });
+      };
+      listenRoot(rootNode, input, onRemoveItem);
       rootNode.appendChild(input);
       container.appendChild(rootNode);
       return {
@@ -221,12 +239,7 @@
           unsubscribe: pubSub.unsubscribe,
           addItems: addItems,
           isValid: isValid,
-          getItems: function () {
-              if (itemsCache === EMPTY_CACHE) {
-                  itemsCache = getTextItemsByRoot(rootNode);
-              }
-              return itemsCache;
-          },
+          getItems: cache.read,
       };
   };
 

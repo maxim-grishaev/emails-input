@@ -51,7 +51,7 @@ export const listenRoot = (rootNode: Root, input: Input, onRemove: () => void) =
     if (isCloseButton(target)) {
       const item = getItemByCloseButton(target)
       if (item) {
-        rootNode.removeChild(item as Node)
+        rootNode.removeChild(item)
         onRemove()
       }
     }
